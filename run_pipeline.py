@@ -2,13 +2,6 @@
 """
 Metric-Semantic 3D Reconstruction Pipeline
 CP260-2026 Final Project
-
-Runs the full pipeline:
-  1. Load data (images, poses, intrinsics)
-  2. Build sparse 3D point cloud
-  3. Annotate semantic entities
-  4. Estimate 3D OBB poses
-  5. Save and validate results
 """
 import os
 import sys
@@ -19,12 +12,12 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from src import config
-from src.data_loader import load_dataset, load_sample_answers
+from src import data
+from src.data import load_dataset, load_sample_answers
 from src.reconstruction import build_sparse_reconstruction, save_point_cloud
 from src.semantic import get_annotations, visualize_annotations
 from src.pose_estimation import estimate_all_poses, validate_with_projection
-from src.utils import save_answers_json, validate_against_sample
+from src.utils import save_answers_json, validate_against_sample, plot_validation_summary
 
 
 def main():
@@ -53,7 +46,7 @@ def main():
             build_sparse_reconstruction(images, poses, K)
 
         if len(points_3d) > 0:
-            ply_path = os.path.join(config.OUTPUT_DIR, "point_cloud.ply")
+            ply_path = os.path.join(data.OUTPUT_DIR, "point_cloud.ply")
             save_point_cloud(points_3d, colors, ply_path)
     else:
         print("\n[Step 2] Skipping reconstruction")
@@ -75,7 +68,7 @@ def main():
 
         # Step 5: Save results
         print("\n[Step 5] Saving results...")
-        answers_path = os.path.join(config.OUTPUT_DIR, "answers.json")
+        answers_path = os.path.join(data.OUTPUT_DIR, "answers.json")
         save_answers_json(results, answers_path)
 
         # Step 6: Validate
@@ -84,8 +77,12 @@ def main():
 
         sample = load_sample_answers()
         validate_against_sample(results, sample)
+
+        # Save validation plot
+        plot_path = os.path.join(data.OUTPUT_DIR, "annotations", "validation_plot.png")
+        plot_validation_summary(results, sample, save_path=plot_path)
     else:
-        answers_path = os.path.join(config.OUTPUT_DIR, "answers.json")
+        answers_path = os.path.join(data.OUTPUT_DIR, "answers.json")
         if os.path.exists(answers_path):
             with open(answers_path, 'r') as f:
                 results = json.load(f)
@@ -98,7 +95,7 @@ def main():
     elapsed = time.time() - t0
     print(f"\n{'=' * 50}")
     print(f"  Done in {elapsed:.1f}s")
-    print(f"  Output: {config.OUTPUT_DIR}")
+    print(f"  Output: {data.OUTPUT_DIR}")
     print(f"{'=' * 50}")
 
 
