@@ -1,0 +1,13 @@
+# Metric-Semantic Reconstruction — CP260-2026
+# Dependencies
+numpy>=1.24
+opencv-python>=4.8
+scipy>=1.10
+matplotlib>=3.7
+torch>=2.0
+open3d>=0.18
+trimesh>=4.0
+tqdm>=4.65
+Pillow>=9.0
+scikit-learn>=1.2
+ultralytics>=8.0
